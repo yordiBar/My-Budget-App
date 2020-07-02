@@ -13,6 +13,16 @@ var budgetController = (function() {
         this.value = value;
     };
 
+    // calculate total income and expense
+    var calculateTotal = function(type) {
+        var sum = 0;
+        data.allItems[type].forEach(function(curr) {
+            sum += curr.value;
+        });
+
+        data.totals[type] = sum;
+    };
+
     // data structure to store input values
     var data = {
         allItems: {
@@ -22,7 +32,9 @@ var budgetController = (function() {
         totals: {
             exp: 0,
             inc: 0
-        }
+        },
+        budget: 0,
+        percentage: -1
     };
 
     return {
@@ -49,6 +61,34 @@ var budgetController = (function() {
 
             // Return the new element
             return newItem;
+        },
+
+        // calculate budget
+        calculateBudget: function() {
+
+            // calculate total income and expenses
+            calculateTotal('exp');
+            calculateTotal('inc');
+
+            // calculate budget: income - expenses
+            data.budget = data.totals.inc - data.totals.exp;
+
+            // calculate the percentage of income spent
+            if (data.totals.inc > 0) {
+                data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100); // round result to whole number
+            } else {
+                data.percentage = -1;
+            }
+        },
+
+        // return budget
+        getBudget: function() {
+            return {
+                budget: data.budget,
+                totalInc: data.totals.inc,
+                totalExp: data.totals.exp,
+                percentage: data.percentage
+            };
         },
 
         testing: function() {
@@ -144,10 +184,13 @@ var controller = (function(budgetCtrl, UICtrl) {
     var updateBudget = function() {
 
         // 1. Calculate budget
+        budgetCtrl.calculateBudget();
 
         // 2. Return Budget
+        budget = budgetController.getBudget();
 
         // 3. Display budget in UI
+        console.log(budget);
 
     }
 
